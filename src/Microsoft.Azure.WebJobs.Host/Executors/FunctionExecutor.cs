@@ -125,15 +125,15 @@ namespace Microsoft.Azure.WebJobs.Host.Executors
                     logCompletedCancellationToken = cancellationToken;
                 }
 
+                if (functionCompletedMessage != null)
+                {
+                    await _functionInstanceLogger.LogFunctionCompletedAsync(functionCompletedMessage, logCompletedCancellationToken);
+                }
+
                 if (instanceLogEntry != null)
                 {
                     await NotifyCompleteAsync(instanceLogEntry, functionCompletedMessage.Arguments, exceptionInfo);
                     _resultsLogger?.LogFunctionResult(instanceLogEntry);
-                }
-
-                if (functionCompletedMessage != null)
-                {
-                    await _functionInstanceLogger.LogFunctionCompletedAsync(functionCompletedMessage, logCompletedCancellationToken);
                 }
 
                 if (loggedStartedEvent)
@@ -649,6 +649,7 @@ namespace Microsoft.Azure.WebJobs.Host.Executors
                 FunctionInstanceId = instance.Id,
                 Function = instance.FunctionDescriptor,
                 ParentId = instance.ParentId,
+                TriggerDetails = instance.TriggerDetails,
                 Reason = instance.Reason,
                 StartTime = DateTimeOffset.UtcNow
             };
@@ -678,6 +679,7 @@ namespace Microsoft.Azure.WebJobs.Host.Executors
                 Function = startedMessage.Function,
                 Arguments = startedMessage.Arguments,
                 ParentId = startedMessage.ParentId,
+                TriggerDetails = startedMessage.TriggerDetails,
                 Reason = startedMessage.Reason,
                 ReasonDetails = startedMessage.FormatReason(),
                 StartTime = startedMessage.StartTime,

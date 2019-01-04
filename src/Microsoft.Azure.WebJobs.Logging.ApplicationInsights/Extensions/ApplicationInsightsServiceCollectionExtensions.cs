@@ -18,6 +18,7 @@ using Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Logging.ApplicationInsights;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
@@ -38,6 +39,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddApplicationInsights(this IServiceCollection services)
         {
+            services.TryAddSingleton<ISdkVersionProvider, WebJobsSdkVersionProvider>();
+
             // Bind to the configuration section registered with 
             services.AddOptions<ApplicationInsightsLoggerOptions>()
                 .Configure<ILoggerProviderConfiguration<ApplicationInsightsLoggerProvider>>((options, config) =>
@@ -86,11 +89,17 @@ namespace Microsoft.Extensions.DependencyInjection
                 // we have to touch (and create) Active configuration before initializing telemetry modules
                 // Active configuration is used to report AppInsights heartbeats
                 // role environment telemetry initializer is needed to correlate heartbeats to particular host
+
+                var activeConfig = TelemetryConfiguration.Active;
                 if (!string.IsNullOrEmpty(options.InstrumentationKey) &&
-                    string.IsNullOrEmpty(TelemetryConfiguration.Active.InstrumentationKey))
+                    string.IsNullOrEmpty(activeConfig.InstrumentationKey))
                 {
-                    TelemetryConfiguration.Active.InstrumentationKey = options.InstrumentationKey;
-                    TelemetryConfiguration.Active.TelemetryInitializers.Add(
+                    activeConfig.InstrumentationKey = options.InstrumentationKey;
+                }
+
+                if (!activeConfig.TelemetryInitializers.OfType<WebJobsRoleEnvironmentTelemetryInitializer>().Any())
+                {
+                    activeConfig.TelemetryInitializers.Add(
                         new WebJobsRoleEnvironmentTelemetryInitializer());
                 }
 
@@ -111,8 +120,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 TelemetryConfiguration configuration = provider.GetService<TelemetryConfiguration>();
                 TelemetryClient client = new TelemetryClient(configuration);
 
-                string assemblyVersion = GetAssemblyFileVersion(typeof(JobHost).Assembly);
-                client.Context.GetInternalContext().SdkVersion = $"webjobs: {assemblyVersion}";
+                ISdkVersionProvider versionProvider = provider.GetService<ISdkVersionProvider>();
+                client.Context.GetInternalContext().SdkVersion = versionProvider?.GetSdkVersion();
 
                 return client;
             });

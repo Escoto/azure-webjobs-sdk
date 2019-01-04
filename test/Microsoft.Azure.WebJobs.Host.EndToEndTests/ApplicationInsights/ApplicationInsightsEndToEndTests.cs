@@ -88,7 +88,7 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
                 await host.GetJobHost().CallAsync(methodInfo, new { input = "function input" });
                 await host.StopAsync();
 
-                Assert.Equal(11, _channel.Telemetries.Count);
+                Assert.Equal(16, _channel.Telemetries.Count);
 
                 // Validate the request
                 RequestTelemetry request = _channel.Telemetries
@@ -108,16 +108,22 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
 
                 string expectedFunctionCategory = LogCategories.CreateFunctionCategory(testName);
                 string expectedFunctionUserCategory = LogCategories.CreateFunctionUserCategory(testName);
+                string expectedOperationId = request.Context.Operation.Id;
 
-                ValidateTrace(telemetries[0], "Executed ", expectedFunctionCategory, testName, invocationId);
-                ValidateTrace(telemetries[1], "Executing ", expectedFunctionCategory, testName, invocationId, request.Context.Operation.Id, request.Id);
-                ValidateTrace(telemetries[2], "Found the following functions:\r\n", LogCategories.Startup);
-                ValidateTrace(telemetries[3], "Job host started", LogCategories.Startup);
-                ValidateTrace(telemetries[4], "Job host stopped", LogCategories.Startup);
-                ValidateTrace(telemetries[5], "Logger", expectedFunctionUserCategory, testName, invocationId, request.Context.Operation.Id, request.Id, hasCustomScope: true);
-                ValidateTrace(telemetries[6], "Starting JobHost", "Microsoft.Azure.WebJobs.Hosting.JobHostService");
-                ValidateTrace(telemetries[7], "Stopping JobHost", "Microsoft.Azure.WebJobs.Hosting.JobHostService");
-                ValidateTrace(telemetries[8], "Trace", expectedFunctionUserCategory, testName, invocationId, request.Context.Operation.Id, request.Id);
+                ValidateTrace(telemetries[0], "ApplicationInsightsLoggerOptions", "Microsoft.Azure.WebJobs.Hosting.OptionsLoggingService");
+                ValidateTrace(telemetries[1], "Executed ", expectedFunctionCategory, testName, invocationId, expectedOperationId, request.Id);
+                ValidateTrace(telemetries[2], "Executing ", expectedFunctionCategory, testName, invocationId, expectedOperationId, request.Id);
+                ValidateTrace(telemetries[3], "Found the following functions:\r\n", LogCategories.Startup);
+                ValidateTrace(telemetries[4], "FunctionResultAggregatorOptions", "Microsoft.Azure.WebJobs.Hosting.OptionsLoggingService");
+                ValidateTrace(telemetries[5], "Job host started", LogCategories.Startup);
+                ValidateTrace(telemetries[6], "Job host stopped", LogCategories.Startup);
+                ValidateTrace(telemetries[7], "Logger", expectedFunctionUserCategory, testName, invocationId, expectedOperationId, request.Id, hasCustomScope: true);
+                ValidateTrace(telemetries[8], "LoggerFilterOptions", "Microsoft.Azure.WebJobs.Hosting.OptionsLoggingService");
+                ValidateTrace(telemetries[9], "LoggerFilterOptions", "Microsoft.Azure.WebJobs.Hosting.OptionsLoggingService");
+                ValidateTrace(telemetries[10], "SingletonOptions", "Microsoft.Azure.WebJobs.Hosting.OptionsLoggingService");
+                ValidateTrace(telemetries[11], "Starting JobHost", "Microsoft.Azure.WebJobs.Hosting.JobHostService");
+                ValidateTrace(telemetries[12], "Stopping JobHost", "Microsoft.Azure.WebJobs.Hosting.JobHostService");
+                ValidateTrace(telemetries[13], "Trace", expectedFunctionUserCategory, testName, invocationId, expectedOperationId, request.Id);
 
                 // We should have 1 custom metric.
                 MetricTelemetry metric = _channel.Telemetries
@@ -139,7 +145,7 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
                 await Assert.ThrowsAsync<FunctionInvocationException>(() => host.GetJobHost().CallAsync(methodInfo, new { input = "function input" }));
                 await host.StopAsync();
 
-                Assert.Equal(14, _channel.Telemetries.Count);
+                Assert.Equal(19, _channel.Telemetries.Count);
 
                 // Validate the request
                 RequestTelemetry request = _channel.Telemetries
@@ -159,17 +165,23 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
 
                 string expectedFunctionCategory = LogCategories.CreateFunctionCategory(testName);
                 string expectedFunctionUserCategory = LogCategories.CreateFunctionUserCategory(testName);
+                string expectedOperationId = request.Context.Operation.Id;
 
-                ValidateTrace(telemetries[0], "Error", expectedFunctionUserCategory, testName, invocationId, request.Context.Operation.Id, request.Id, expectedLogLevel: LogLevel.Error);
-                ValidateTrace(telemetries[1], "Executed", expectedFunctionCategory, testName, invocationId, expectedLogLevel: LogLevel.Error);
-                ValidateTrace(telemetries[2], "Executing", expectedFunctionCategory, testName, invocationId, request.Context.Operation.Id, request.Id);
-                ValidateTrace(telemetries[3], "Found the following functions:\r\n", LogCategories.Startup);
-                ValidateTrace(telemetries[4], "Job host started", LogCategories.Startup);
-                ValidateTrace(telemetries[5], "Job host stopped", LogCategories.Startup);
-                ValidateTrace(telemetries[6], "Logger", expectedFunctionUserCategory, testName, invocationId, request.Context.Operation.Id, request.Id, hasCustomScope: true);
-                ValidateTrace(telemetries[7], "Starting JobHost", "Microsoft.Azure.WebJobs.Hosting.JobHostService");
-                ValidateTrace(telemetries[8], "Stopping JobHost", "Microsoft.Azure.WebJobs.Hosting.JobHostService");
-                ValidateTrace(telemetries[9], "Trace", expectedFunctionUserCategory, testName, invocationId, request.Context.Operation.Id, request.Id);
+                ValidateTrace(telemetries[0], "ApplicationInsightsLoggerOptions", "Microsoft.Azure.WebJobs.Hosting.OptionsLoggingService");
+                ValidateTrace(telemetries[1], "Error", expectedFunctionUserCategory, testName, invocationId, expectedOperationId, request.Id, expectedLogLevel: LogLevel.Error);
+                ValidateTrace(telemetries[2], "Executed", expectedFunctionCategory, testName, invocationId, expectedOperationId, request.Id, expectedLogLevel: LogLevel.Error);
+                ValidateTrace(telemetries[3], "Executing", expectedFunctionCategory, testName, invocationId, expectedOperationId, request.Id);
+                ValidateTrace(telemetries[4], "Found the following functions:\r\n", LogCategories.Startup);
+                ValidateTrace(telemetries[5], "FunctionResultAggregatorOptions", "Microsoft.Azure.WebJobs.Hosting.OptionsLoggingService");
+                ValidateTrace(telemetries[6], "Job host started", LogCategories.Startup);
+                ValidateTrace(telemetries[7], "Job host stopped", LogCategories.Startup);
+                ValidateTrace(telemetries[8], "Logger", expectedFunctionUserCategory, testName, invocationId, expectedOperationId, request.Id, hasCustomScope: true);
+                ValidateTrace(telemetries[9], "LoggerFilterOptions", "Microsoft.Azure.WebJobs.Hosting.OptionsLoggingService");
+                ValidateTrace(telemetries[10], "LoggerFilterOptions", "Microsoft.Azure.WebJobs.Hosting.OptionsLoggingService");
+                ValidateTrace(telemetries[11], "SingletonOptions", "Microsoft.Azure.WebJobs.Hosting.OptionsLoggingService");
+                ValidateTrace(telemetries[12], "Starting JobHost", "Microsoft.Azure.WebJobs.Hosting.JobHostService");
+                ValidateTrace(telemetries[13], "Stopping JobHost", "Microsoft.Azure.WebJobs.Hosting.JobHostService");
+                ValidateTrace(telemetries[14], "Trace", expectedFunctionUserCategory, testName, invocationId, expectedOperationId, request.Id);
 
                 // Validate the exception
                 ExceptionTelemetry[] exceptions = _channel.Telemetries
@@ -177,15 +189,15 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
                     .OrderBy(t => t.Timestamp)
                     .ToArray();
                 Assert.Equal(3, exceptions.Length);
-                ValidateException(exceptions[0], expectedFunctionUserCategory, testName, request.Context.Operation.Id, request.Id);
-                ValidateException(exceptions[1], LogCategories.Results, testName, request.Context.Operation.Id, request.Id);
-                ValidateException(exceptions[2], expectedFunctionCategory, testName, null, null);
+                ValidateException(exceptions[0], expectedFunctionUserCategory, testName, expectedOperationId, request.Id);
+                ValidateException(exceptions[1], expectedFunctionCategory, testName, expectedOperationId, request.Id);
+                ValidateException(exceptions[2], LogCategories.Results, testName, expectedOperationId, request.Id);
             }
         }
 
         [Theory]
         [InlineData(LogLevel.None, 0, 0)]
-        [InlineData(LogLevel.Information, 5, 5)] // 3 start, 2 stop, 4x traces per request, 1x requests
+        [InlineData(LogLevel.Information, 5, 10)] // 5 start, 2 stop, 4x traces per request, 1x requests
         [InlineData(LogLevel.Warning, 2, 0)] // 2x warning trace per request
         public async Task QuickPulse_Works_EvenIfFiltered(LogLevel defaultLevel, int tracesPerRequest, int additionalTraces)
         {
@@ -255,6 +267,8 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
                     string timestamp = $"[{t.Timestamp.ToString(_dateFormat)}] ";
                     switch (t)
                     {
+                        case DependencyTelemetry dependency:
+                            return timestamp + $"[Dependency] {dependency.Name}; {dependency.Target}; {dependency.Data}";
                         case TraceTelemetry trace:
                             return timestamp + $"[Trace] {trace.Message}";
                         case RequestTelemetry request:
@@ -265,7 +279,14 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
                 }));
 
                 int expectedTelemetryItems = additionalTraces + (functionsCalled * tracesPerRequest);
-                Assert.True(_channel.Telemetries.Count == expectedTelemetryItems, failureString);
+
+                // Filter out the odd auto-tracked request that we occassionally see from AppVeyor. 
+                // From here: https://github.com/xunit/xunit/blob/9d10262a3694bb099ddd783d735aba2a7aac759d/src/xunit.runner.reporters/AppVeyorClient.cs#L21
+                var actualTelemetries = _channel.Telemetries
+                    .Where(p => !(p is DependencyTelemetry d && d.Name == "POST /api/tests/batch"))
+                    .ToArray();
+                Assert.True(actualTelemetries.Length == expectedTelemetryItems,
+                   $"Expected: {expectedTelemetryItems}; Actual: {actualTelemetries.Length}{Environment.NewLine}{failureString}");
             }
         }
 
@@ -317,7 +338,7 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
                 // There must be only one reported by the AppInsights request collector
                 RequestTelemetry[] requestTelemetries = _channel.Telemetries.OfType<RequestTelemetry>().ToArray();
                 Assert.Single(requestTelemetries);
-                
+
                 RequestTelemetry functionRequest = requestTelemetries.Single();
                 Assert.Same(outerRequest, functionRequest);
 

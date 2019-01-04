@@ -188,6 +188,8 @@ namespace Microsoft.Azure.WebJobs.Host.UnitTests
                 "IListenerFactory",
                 "ILoadBalancerQueue",
                 "INameResolver",
+                "IOptionsFormatter",
+                "IOptionsFormatter`1",
                 "IOrderedValueBinder",
                 "IResolutionPolicy",
                 "ITriggerBinding",
@@ -256,7 +258,8 @@ namespace Microsoft.Azure.WebJobs.Host.UnitTests
             {
                 "ApplicationInsightsLoggerOptions",
                 "ApplicationInsightsLoggerProvider",
-                "ApplicationInsightsLoggingBuilderExtensions"
+                "ApplicationInsightsLoggingBuilderExtensions",
+                "ISdkVersionProvider"
             };
 
             TestHelpers.AssertPublicTypes(expected, assembly);

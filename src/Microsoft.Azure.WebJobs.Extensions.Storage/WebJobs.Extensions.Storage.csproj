@@ -4,6 +4,7 @@
   <Import Project="..\..\build\common.props" />  
   
   <PropertyGroup>
+    <Version>$(ExtensionsStorageVersion)</Version>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Microsoft.Azure.WebJobs.Extensions.Storage</AssemblyName>
     <RootNamespace>Microsoft.Azure.WebJobs.Extensions.Storage</RootNamespace>
